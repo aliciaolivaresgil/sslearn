@@ -834,6 +834,10 @@ class TriTrainingRegressor(BaseEstimator, RegressorMixin):
     - `fit`: Fit the model with the labeled instances.
     - `predict` : Predict the class for each instance.
     - `score`: Return the coefficient of determination of the prediction.
+
+    **References**
+    ----------
+    To be published.
     """
     def __init__(self,  
                  base_estimator=DecisionTreeRegressor(), 
@@ -886,6 +890,9 @@ class TriTrainingRegressor(BaseEstimator, RegressorMixin):
         """
         random_state = check_random_state(self.random_state)
         self.n_jobs = min(check_n_jobs(self.n_jobs), self._N_LEARNER)
+
+        if isinstance(X, pd.DataFrame): 
+            X = X.to_numpy()
 
         X_label, y_label, X_unlabel = get_dataset_regression(X, y)
 
@@ -1060,6 +1067,8 @@ class TriTrainingRegressor(BaseEstimator, RegressorMixin):
         y : array-like of shape (n_sampes,)
             Prediction of the model. 
         """
+        if isinstance(X, pd.DataFrame): 
+            X = X.to_numpy()
         predictions = []
         for h in self.h_: 
             predictions.append(h.predict(X))

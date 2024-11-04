@@ -15,14 +15,14 @@ from sklearn.datasets import load_breast_cancer, load_diabetes
 from sslearn.datasets import read_csv
 from sslearn.model_selection import artificial_ssl_dataset
 from sslearn.wrapper import (
-    CoTraining, CoForest, CoTrainingByCommittee, DemocraticCoLearning, Rasco, RelRasco,
+    CoTraining, CoForest, CoTrainingByCommittee, DemocraticCoLearning, Rasco, RelRasco, CoReg,
     SelfTraining, Setred, TriTraining, DeTriTraining, TriTrainingRegressor
 )
 
 X, y = read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), "example_files", "abalone.csv"), format="pandas")
 X2, y2 = read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), "example_files", "abalone.csv"), format="numpy")
-X3, y3 = read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), "example_files", "abalone.csv"), format="pandas", is_regression=True)
-X4, y4 = read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), "example_files", "abalone.csv"), format="numpy", is_regression=True)
+X3, y3 = read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), "example_files", "abalone_regression.csv"), format="pandas", is_regression=True)
+X4, y4 = read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), "example_files", "abalone_regression.csv"), format="numpy", is_regression=True)
 
 X_l, y_l = load_breast_cancer(return_X_y=True)
 X_l2, y_l2 = load_diabetes(return_X_y=True)
@@ -288,6 +288,30 @@ class TestTriTrainingRegressor:
 
     def test_all_label(self):
         check_all_label_regression(TriTrainingRegressor)
+
+class TestCoReg: 
+    def test_basic(self): 
+        check_basic_regression(CoReg, max_iterations=10)
+
+    def test_multiview(self):
+        reg = CoReg(max_iterations=10)
+        reg.fit(X3.iloc[:, :len(X3.columns)//2], y3, X2=X3.iloc[:, len(X3.columns)//2:])
+        reg.predict(X3.iloc[:, :len(X3.columns)//2], X2=X3.iloc[:, len(X3.columns)//2:])
+
+    def test_random_state(self):
+        estimator = CoReg 
+        for i in range(5): 
+            reg = eval(f"estimator(max_iterations=10, random_state=i)")
+            reg.fit(X3, y3)
+            y1 = reg.predict(X3)
+            reg = eval(f"estimator(max_iterations=10, random_state=i)")
+            reg.fit(X3, y3)
+            y2 = reg.predict(X3)
+            assert np.all(y2 == y2)
+
+    def test_all_label(self): 
+        check_all_label_regression(CoReg)
+
 
 # Create a fake groups
 groups = list()
