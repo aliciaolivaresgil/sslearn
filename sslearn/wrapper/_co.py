@@ -1614,6 +1614,9 @@ class CoReg(BaseEstimator, RegressorMixin):
         if isinstance(X, pd.DataFrame): 
             X = X.to_numpy()
 
+        if isinstance(y, pd.DataFrame): 
+            y = y.to_numpy().flatten()
+
         X1_label, y_label, X1_unlabel = get_dataset_regression(X, y)
 
         if X2 is None: 
@@ -1673,25 +1676,27 @@ class CoReg(BaseEstimator, RegressorMixin):
                     deltas[idx_u] = delta
                     y_u_hats[idx_u] = y_u_hat
 
-                #Choose bigger delta
-                max_idx = np.argmax(deltas)
+                if deltas.size: 
 
-                if deltas[max_idx] > 0: 
-                    stop_training = False
+                    #Choose bigger delta
+                    max_idx = np.argmax(deltas)
 
-                    if idx_h == 1: 
-                        x_u = X2_pool[max_idx].reshape(1, -1)
-                        y_u_hat = y_u_hats[max_idx]
-                        idx_u = idx2_pool[max_idx]
-                        X2_label = np.concatenate((X2_label, x_u))
-                        y2 = np.append(y2, y_u_hat)
-                    else: 
-                        x_u = X1_pool[max_idx].reshape(1, -1)
-                        y_u_hat = y_u_hats[max_idx]
-                        idx_u = idx1_pool[max_idx]
-                        X1_label = np.concatenate((X1_label, x_u))
-                        y1 = np.append(y1, y_u_hat)
-                    to_remove.append(idx_u)
+                    if deltas[max_idx] > 0: 
+                        stop_training = False
+
+                        if idx_h == 1: 
+                            x_u = X2_pool[max_idx].reshape(1, -1)
+                            y_u_hat = y_u_hats[max_idx]
+                            idx_u = idx2_pool[max_idx]
+                            X2_label = np.concatenate((X2_label, x_u))
+                            y2 = np.append(y2, y_u_hat)
+                        else: 
+                            x_u = X1_pool[max_idx].reshape(1, -1)
+                            y_u_hat = y_u_hats[max_idx]
+                            idx_u = idx1_pool[max_idx]
+                            X1_label = np.concatenate((X1_label, x_u))
+                            y1 = np.append(y1, y_u_hat)
+                        to_remove.append(idx_u)
 
             if stop_training: 
                 break

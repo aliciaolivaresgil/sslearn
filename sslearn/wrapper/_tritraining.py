@@ -894,6 +894,9 @@ class TriTrainingRegressor(BaseEstimator, RegressorMixin):
         if isinstance(X, pd.DataFrame): 
             X = X.to_numpy()
 
+        if isinstance(y, pd.DataFrame): 
+            y = y.to_numpy().flatten()
+
         X_label, y_label, X_unlabel = get_dataset_regression(X, y)
 
         is_df = isinstance(X_label, pd.DataFrame)
